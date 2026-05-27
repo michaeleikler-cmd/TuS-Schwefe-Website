@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TuS Schwefe 1921 – Vorschau</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0a0f1e;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Preview Bar ── */
+#preview-bar {
+    background: linear-gradient(135deg, #001f5c 0%, #003399 100%);
+    color: white;
+    padding: 0 1rem;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    z-index: 100;
+}
+
+.bar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 4px;
+}
+
+.bar-logo-icon {
+    width: 32px;
+    height: 32px;
+    background: #ffc72c;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    color: #001f5c;
+    flex-shrink: 0;
+}
+
+.bar-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffc72c;
+    white-space: nowrap;
+}
+
+.bar-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+}
+
+.bar-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    white-space: nowrap;
+}
+
+#pageSelect {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 13px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    cursor: pointer;
+    outline: none;
+    min-width: 160px;
+    transition: background 0.2s;
+}
+
+#pageSelect:hover, #pageSelect:focus {
+    background: rgba(255,255,255,0.2);
+}
+
+#pageSelect option {
+    background: #001f5c;
+    color: white;
+}
+
+.bar-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.bar-btn-back {
+    background: rgba(255,255,255,0.12);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.bar-btn-back:hover { background: rgba(255,255,255,0.2); }
+
+.bar-btn-open {
+    background: #ffc72c;
+    color: #001f5c;
+}
+.bar-btn-open:hover { background: #ffdb6d; }
+
+/* Device selector */
+.device-group {
+    display: flex;
+    gap: 3px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    padding: 3px;
+}
+
+.device-btn {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.device-btn.active {
+    background: rgba(255,255,255,0.15);
+    color: white;
+}
+
+.device-btn:hover:not(.active) {
+    color: rgba(255,255,255,0.9);
+}
+
+#page-indicator {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    font-family: monospace;
+}
+
+.bar-spacer { flex: 1; }
+
+/* ── Viewport Area ── */
+#viewport-area {
+    flex: 1;
+    background: #141929;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px;
+    overflow: auto;
+    min-height: 0;
+}
+
+#device-frame {
+    background: white;
+    transition: width 0.3s ease, max-height 0.3s ease;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+#device-frame.desktop {
+    width: 100%;
+    max-width: 1440px;
+    height: calc(100vh - 52px - 32px);
+}
+
+#device-frame.tablet {
+    width: 768px;
+    height: calc(100vh - 52px - 32px);
+    border-radius: 12px;
+    border: 8px solid #1a1a2e;
+}
+
+#device-frame.mobile {
+    width: 390px;
+    height: calc(100vh - 52px - 32px);
+    border-radius: 20px;
+    border: 10px solid #1a1a2e;
+    max-height: 844px;
+}
+
+#site-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* Loading overlay */
+#loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #003399;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+    font-size: 13px;
+    color: #666;
+    font-family: system-ui;
+}
+</style>
+</head>
+<body>
+
+<div id="preview-bar">
+    <div class="bar-logo">
+        <div class="bar-logo-icon">TuS</div>
+        <span class="bar-title">TuS Schwefe 1921</span>
+    </div>
+
+    <div class="bar-divider"></div>
+
+    <span class="bar-label">Seite:</span>
+    <select id="pageSelect" onchange="loadFromSelect()">
+        <option value="index.html">🏠 Startseite</option>
+        <option value="verein.html">🏛 Verein</option>
+        <option value="vorstand.html">👥 Vorstand</option>
+        <option value="geschichte.html">📜 Geschichte</option>
+        <option value="vereinsheim.html">🏠 Vereinsheim</option>
+        <option value="kunstrasen.html">⚽ Kunstrasen</option>
+        <option value="kunstrasen-pate.html">🤝 Patenschaft</option>
+        <option value="abteilungen.html">📋 Abteilungen</option>
+        <option value="fussball.html">⚽ Fußball</option>
+        <option value="mannschaft-1.html">⚽ 1. Mannschaft</option>
+        <option value="mannschaft-2.html">⚽ 2. Mannschaft</option>
+        <option value="alte-herren.html">⚽ Alte Herren</option>
+        <option value="jugend.html">🧒 Jugend</option>
+        <option value="gymnastik.html">🤸 Gymnastik</option>
+        <option value="kinderturnen.html">🧸 Kinderturnen</option>
+        <option value="veranstaltungen.html">📅 Termine</option>
+        <option value="sponsoren.html">💼 Sponsoren</option>
+        <option value="mitglied-werden.html">📝 Mitglied werden</option>
+        <option value="kontakt.html">📞 Kontakt</option>
+        <option value="impressum.html">📄 Impressum</option>
+        <option value="datenschutz.html">🔒 Datenschutz</option>
+    </select>
+
+    <button class="bar-btn bar-btn-back" onclick="goBack()" title="Zurück">
+        ◀ Zurück
+    </button>
+
+    <div class="bar-divider"></div>
+
+    <div class="device-group">
+        <button class="device-btn active" onclick="setDevice('desktop', this)" title="Desktop">🖥</button>
+        <button class="device-btn" onclick="setDevice('tablet', this)" title="Tablet">📱</button>
+        <button class="device-btn" onclick="setDevice('mobile', this)" title="Mobil">📲</button>
+    </div>
+
+    <div class="bar-spacer"></div>
+
+    <span id="page-indicator"></span>
+
+    <button class="bar-btn bar-btn-open" onclick="openInTab()" title="In neuem Tab öffnen">
+        ↗ Im Browser öffnen
+    </button>
+</div>
+
+<div id="viewport-area">
+    <div id="device-frame" class="desktop">
+        <div id="loading-overlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Seite wird geladen…</div>
+        </div>
+        <iframe id="site-iframe" src="index.html" onload="onIframeLoad()"></iframe>
+    </div>
+</div>
+
+<script>
+let history_stack = [];
+let current_page = 'index.html';
+
+function onIframeLoad() {
+    document.getElementById('loading-overlay').style.display = 'none';
+    // Try to sync the URL from iframe
+    try {
+        const iframeSrc = document.getElementById('site-iframe').src;
+        const filename = iframeSrc.split('/').pop().split('?')[0];
+        if (filename && filename.endsWith('.html')) {
+            updateIndicator(filename);
+            syncSelect(filename);
+            current_page = filename;
+        }
+    } catch(e) {}
+}
+
+function showLoading() {
+    document.getElementById('loading-overlay').style.display = 'flex';
+}
+
+function loadPage(filename) {
+    if (filename === current_page) return;
+    history_stack.push(current_page);
+    current_page = filename;
+    showLoading();
+    document.getElementById('site-iframe').src = filename;
+    syncSelect(filename);
+    updateIndicator(filename);
+}
+
+function loadFromSelect() {
+    const sel = document.getElementById('pageSelect');
+    loadPage(sel.value);
+}
+
+function goBack() {
+    if (history_stack.length > 0) {
+        const prev = history_stack.pop();
+        current_page = prev;
+        showLoading();
+        document.getElementById('site-iframe').src = prev;
+        syncSelect(prev);
+        updateIndicator(prev);
+    }
+}
+
+function syncSelect(filename) {
+    const sel = document.getElementById('pageSelect');
+    for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === filename) {
+            sel.selectedIndex = i;
+            break;
+        }
+    }
+}
+
+function updateIndicator(filename) {
+    document.getElementById('page-indicator').textContent = filename;
+}
+
+function setDevice(type, btn) {
+    document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const frame = document.getElementById('device-frame');
+    frame.className = 'desktop'; // reset
+    frame.classList.add(type);
+}
+
+function openInTab() {
+    window.open(current_page, '_blank');
+}
+
+// Listen for navigation inside iframe (same-origin)
+document.getElementById('site-iframe').addEventListener('load', onIframeLoad);
+</script>
+</body>
+</html>
